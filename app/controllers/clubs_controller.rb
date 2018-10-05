@@ -1,5 +1,7 @@
 class ClubsController < ApplicationController
 
+  before_action :require_login, except: [:index]
+
   def index
     @clubs = Club.all
   end
@@ -39,6 +41,22 @@ class ClubsController < ApplicationController
     else
       flash.now[:alert] = @club.errors.full_messages
       render :edit
+    end
+  end
+
+  private
+
+  def require_login
+    if !session[users_id]
+      flash[:alert] = ["You need to login first!"]
+      redirect_to new_session_path
+    end
+  end
+
+  def require_ownership
+    if current_user != @club.user
+      flash[:alert] = ["You are not authorized for that!"]
+      redirect_to new_session_path
     end
   end
 
